@@ -2,11 +2,9 @@
 
 namespace SuperEggs\DcatDistpicker;
 
-use Dcat\Admin\Extend\ServiceProvider;
-use Dcat\Admin\Admin;
+use Illuminate\Support\ServiceProvider;
 use Dcat\Admin\Form;
-use Dcat\Admin\Grid\Filter;
-
+use SuperEggs\DcatDistpicker\Form\Distpicker;
 
 class DcatDistpickerServiceProvider extends ServiceProvider
 {
@@ -15,19 +13,25 @@ class DcatDistpickerServiceProvider extends ServiceProvider
         //
     }
 
-    public function init()
+    /**
+     * {@inheritdoc}
+     */
+    public function boot()
     {
-        parent::init();
-        $this->loadViewsFrom(__DIR__.'/../resources/views', 'china-distpicker');
+        $extension = ChinaDistpicker::make();
 
-        //加载插件
-        Admin::booting(function () {
-            Form::extend('distpicker', \SuperEggs\DcatDistpicker\Form\Distpicker::class);
-            Filter::extend('distpicker', \SuperEggs\DcatDistpicker\Filter\DistpickerFilter::class);
 
-        });
-        //
+        if ($views = $extension->views()) {
+            $this->loadViewsFrom($views, ChinaDistpicker::NAME);
+        }
 
+        if ($this->app->runningInConsole() && $assets = $extension->assets()) {
+            $this->publishes(
+                [$assets => public_path('vendor/super-eggs/dcat-distpicker')],
+                'dcat-distpicker'
+            );
+        }
+        Form::extend('distpicker', Distpicker::class);
     }
 
 }

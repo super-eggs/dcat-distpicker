@@ -1,15 +1,15 @@
 <?php
 
-namespace Dcat\Admin\Extension\ChinaDistpicker;
+namespace SuperEggs\DcatDistpicker;
 
-use Dcat\Admin\AdminException;
+use Dcat\Admin\Extension;
 
 class ChinaDistpicker extends Extension
 {
     const NAME = 'china-distpicker';
     public $name = 'china-distpicker';
 
-    protected $serviceProvider = ChinaDistpickerServiceProvider::class;
+    protected $serviceProvider = DcatDistpickerServiceProvider::class;
 
     protected $assets = __DIR__.'/../resources/assets';
 

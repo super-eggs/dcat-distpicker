@@ -16,7 +16,7 @@ class Distpicker extends Field
      * @var array
      */
     protected static $js = [
-        '@extension/super-eggs/dcat-distpicker/dist/distpicker.min.js'
+        'vendor/super-eggs/dcat-distpicker/dist/distpicker.min.js',
     ];
 
     /**
@@ -32,15 +32,15 @@ class Distpicker extends Field
     /**
      * Distpicker constructor.
      *
-     * @param array $column
-     * @param array $arguments
+     * @param  array  $column
+     * @param  array  $arguments
      */
     public function __construct($column, $arguments)
     {
         if (!Arr::isAssoc($column)) {
             $this->column = array_combine($this->columnKeys, $column);
         } else {
-            $this->column      = array_combine($this->columnKeys, array_keys($column));
+            $this->column = array_combine($this->columnKeys, array_keys($column));
             $this->placeholder = array_combine($this->columnKeys, $column);
         }
 
@@ -76,7 +76,7 @@ class Distpicker extends Field
     }
 
     /**
-     * @param int $count
+     * @param  int  $count
      * @return $this
      */
     public function autoselect($count = 0)
@@ -91,9 +91,11 @@ class Distpicker extends Field
     {
         $this->attribute('data-value-type', 'code');
 
-        $province = old($this->column['province'], Arr::get($this->value(), 'province')) ?: Arr::get($this->placeholder, 'province');
-        $city     = old($this->column['city'],     Arr::get($this->value(), 'city'))     ?: Arr::get($this->placeholder, 'city');
-        $district = old($this->column['district'], Arr::get($this->value(), 'district')) ?: Arr::get($this->placeholder, 'district');
+        $province = old($this->column['province'], Arr::get($this->value(), 'province')) ?: Arr::get($this->placeholder,
+            'province');
+        $city = old($this->column['city'], Arr::get($this->value(), 'city')) ?: Arr::get($this->placeholder, 'city');
+        $district = old($this->column['district'], Arr::get($this->value(), 'district')) ?: Arr::get($this->placeholder,
+            'district');
 
         $id = uniqid('distpicker-');
 
@@ -107,8 +109,6 @@ $('#' + oid).attr('id', nid).distpicker({
   district: '$district'
 });
 EOT;
-        $this->addVariables(compact('id'));
-
-        return parent::render();
+        return parent::render()->with(compact('id'));
     }
 }

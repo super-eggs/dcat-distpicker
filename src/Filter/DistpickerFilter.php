@@ -16,7 +16,7 @@ class DistpickerFilter extends AbstractFilter
     protected $column = [];
 
     protected static $js = [
-        '@extension/super-eggs/dcat-distpicker/dist/distpicker.min.js'
+        'vendor/super-eggs/dcat-distpicker/dist/distpicker.min.js'
     ];
 
     /**
