@@ -10,17 +10,28 @@
 
 首先
 
-```composer require super-eggs/dcat-admin-extensions-distpicker```
+```shell script
+# jqhph/dcat-admin 1.x
+composer require "super-eggs/dcat-distpicker:^1.0"
 
+# jqhph/dcat-admin 2.x
+composer require "super-eggs/dcat-distpicker:^2.0"
+```
 
+然后: (dcat-admin 2.x 无需执行!!!)
+
+```shell script
+php artisan admin:import dcat-distpicker
+```
 
 ## 开启扩展
 
 后台开启
 
+- dcat-admin 1.x
 ![image-20200628150337687](https://tva1.sinaimg.cn/large/007S8ZIlly1gg80m0xbf8j321m0iaq5b.jpg)
-
-
+- dcat-admin 2.x
+![image-20201201230850804](https://i.loli.net/2020/12/01/cqbR7FIiErZTzeY.png)
 
 ## 使用
 
