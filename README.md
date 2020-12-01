@@ -12,10 +12,10 @@
 
 ```shell script
 # jqhph/dcat-admin 1.x
-composer require "super-eggs/dcat-admin-extensions-distpicker:^1.0"
+composer require "super-eggs/dcat-distpicker:^1.0"
 
 # jqhph/dcat-admin 2.x
-composer require "super-eggs/dcat-admin-extensions-distpicker:^2.0"
+composer require "super-eggs/dcat-distpicker:^2.0"
 ```
 
 然后: (dcat-admin 2.x 无需执行)
