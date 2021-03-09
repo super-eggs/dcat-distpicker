@@ -3,10 +3,10 @@
 namespace SuperEggs\DcatDistpicker\Filter;
 
 use Dcat\Admin\Admin;
+use Dcat\Admin\Grid\Filter;
 use Dcat\Admin\Grid\Filter\AbstractFilter;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
-use Dcat\Admin\Grid\Filter;
 
 class DistpickerFilter extends AbstractFilter
 {
@@ -16,7 +16,7 @@ class DistpickerFilter extends AbstractFilter
     protected $column = [];
 
     protected static $js = [
-        '@extension/super-eggs/dcat-distpicker/dist/distpicker.min.js'
+        '@extension/super-eggs/dcat-distpicker/dist/distpicker.min.js',
     ];
 
     /**
@@ -32,17 +32,31 @@ class DistpickerFilter extends AbstractFilter
     /**
      * DistpickerFilter constructor.
      *
-     * @param string $province
-     * @param string $city
-     * @param string $district
-     * @param string $label
+     * @param  string  $province
+     * @param  string  $city
+     * @param  string  $district
+     * @param  string  $label
      */
     public function __construct($province, $city, $district, $label = '')
     {
         $this->column = compact('province', 'city', 'district');
-        $this->label  = $label;
+        $this->label = $label;
 
         $this->setPresenter(new FilterPresenter());
+    }
+
+
+    public function originalColumn()
+    {
+        return $this->column;
+    }
+
+    /**
+     * @return string
+     */
+    public function getElementName()
+    {
+        return $this->parent->grid()->makeName('district');
     }
 
     public function setParent(Filter $filter)
@@ -66,6 +80,7 @@ class DistpickerFilter extends AbstractFilter
             $columns[] = $parentName ? "{$parentName}_{$column}" : $column;
         }
 
+
         return $columns;
     }
 
@@ -74,22 +89,23 @@ class DistpickerFilter extends AbstractFilter
      */
     public function condition($inputs)
     {
+
+        //todo 测试
         $value = array_filter([
             $this->column['province'] => Arr::get($inputs, $this->column['province']),
-            $this->column['city']     => Arr::get($inputs, $this->column['city']),
+            $this->column['city'] => Arr::get($inputs, $this->column['city']),
             $this->column['district'] => Arr::get($inputs, $this->column['district']),
         ]);
 
-        if (!isset($value)) {
+        if (empty($value)) {
             return;
         }
 
         $this->value = $value;
 
-         if (!$this->value) {
+        if (!$this->value) {
             return [];
         }
-
 
         if (Str::contains(key($value), '.')) {
             return $this->buildRelationQuery($value);
@@ -99,6 +115,7 @@ class DistpickerFilter extends AbstractFilter
     }
 
     /**
+     * 建立关系查询
      * {@inheritdoc}
      */
     protected function buildRelationQuery(...$columns)
@@ -113,12 +130,17 @@ class DistpickerFilter extends AbstractFilter
 
         $args = $data[$relation];
 
-        return ['whereHas' => [$relation, function ($relation) use ($args) {
-            call_user_func_array([$relation, $this->query], [$args]);
-        }]];
+        return [
+            'whereHas' => [
+                $relation, function ($relation) use ($args) {
+                    call_user_func_array([$relation, $this->query], [$args]);
+                },
+            ],
+        ];
     }
 
     /**
+     * 格式名称
      * {@inheritdoc}
      */
     public function formatName($column)
@@ -132,18 +154,33 @@ class DistpickerFilter extends AbstractFilter
         return $columns;
     }
 
+    /**
+     * 格式编号
+     * @param  array|string  $columns
+     * @return array|string
+     * @author guozhiyuan
+     */
     protected function formatId($columns)
     {
-        return str_replace('.', '_', $columns);
+        if (is_array($columns)) {
+            $columns = 'district';
+//            foreach ($columns as &$column) {
+//                $column = $this->formatId($column);
+//            }
+//            return $columns;
+        }
+
+        return $this->parent->grid()->makeName('filter-column-'.str_replace('.', '-', $columns));
     }
 
     /**
+     * 设置js脚本。
      * Setup js scripts.
      */
     protected function setupScript()
     {
         $province = old($this->column['province'], Arr::get($this->value, $this->column['province']));
-        $city     = old($this->column['city'], Arr::get($this->value, $this->column['city']));
+        $city = old($this->column['city'], Arr::get($this->value, $this->column['city']));
         $district = old($this->column['district'], Arr::get($this->value, $this->column['district']));
 
         $script = <<<JS
@@ -157,22 +194,22 @@ JS;
         Admin::js(static::$js);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function variables()
-    {
-        $this->id = 'distpicker-filter-' . uniqid();
 
+    protected function defaultVariables()
+    {
         $this->setupScript();
 
-        return array_merge([
-            'id'        => $this->id,
-            'name'      => $this->formatName($this->column),
-            'label'     => $this->label,
-            'value'     => $this->value ?: $this->defaultValue,
+        $data = array_merge([
+            'id' => $this->id,
+            'name' => $this->formatName($this->column),
+            'label' => $this->label,
+            'value' => $this->normalizeValue(),
             'presenter' => $this->presenter(),
+            'width' => $this->width,
+            'style' => $this->style,
         ], $this->presenter()->variables());
+
+        return $data;
     }
 
     public function render()
