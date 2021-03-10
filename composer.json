@@ -1,6 +1,7 @@
 {
     "name": "super-eggs/dcat-distpicker",
     "description": "Distpicker extension for dcat-admin",
+    "alias": "省市区三级联动组件",
     "type": "library",
     "keywords": ["dcat-admin", "extension", "distpicker"],
     "homepage": "https://github.com/super-eggs/dcat-distpicker",
