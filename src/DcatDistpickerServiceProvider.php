@@ -6,6 +6,8 @@ use Dcat\Admin\Extend\ServiceProvider;
 use Dcat\Admin\Admin;
 use Dcat\Admin\Form;
 use Dcat\Admin\Grid\Filter;
+use SuperEggs\DcatDistpicker\Filter\DistpickerFilter;
+use SuperEggs\DcatDistpicker\Form\Distpicker;
 
 
 class DcatDistpickerServiceProvider extends ServiceProvider
@@ -21,13 +23,9 @@ class DcatDistpickerServiceProvider extends ServiceProvider
         $this->loadViewsFrom(__DIR__.'/../resources/views', 'china-distpicker');
 
         //加载插件
-        Admin::booting(function () {
-            Form::extend('distpicker', \SuperEggs\DcatDistpicker\Form\Distpicker::class);
-            Filter::extend('distpicker', \SuperEggs\DcatDistpicker\Filter\DistpickerFilter::class);
-
+        Admin::booting(static function () {
+            Form::extend('distpicker', Distpicker::class);
+            Filter::extend('distpicker', DistpickerFilter::class);
         });
-        //
-
     }
-
 }
