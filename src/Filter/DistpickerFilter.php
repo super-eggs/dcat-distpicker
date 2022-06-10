@@ -118,7 +118,7 @@ class DistpickerFilter extends AbstractFilter
      * 建立关系查询
      * {@inheritdoc}
      */
-    protected function buildRelationQuery($relColumn, ...$columns)
+    protected function buildRelationQuery(...$columns)
     {
         $data = [];
 
