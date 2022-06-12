@@ -3,8 +3,8 @@
 namespace SuperEggs\DcatDistpicker\Filter;
 
 use Dcat\Admin\Admin;
-use Dcat\Admin\Grid\Filter;
 use Dcat\Admin\Grid\Filter\AbstractFilter;
+use Dcat\Laravel\Database\WhereHasInServiceProvider;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 
@@ -15,8 +15,8 @@ class DistpickerFilter extends AbstractFilter
      */
     protected $column = [];
 
-    protected static $js = [
-        '@extension/super-eggs/dcat-distpicker/dist/distpicker.min.js',
+    protected static array $js = [
+        '@extension/super-eggs/dcat-distpicker/dist/distpicker.js',
     ];
 
     /**
@@ -29,48 +29,39 @@ class DistpickerFilter extends AbstractFilter
      */
     protected $defaultValue = [];
 
+    private array $placeholder = [];
+
     /**
      * DistpickerFilter constructor.
-     *
      * @param  string  $province
      * @param  string  $city
      * @param  string  $district
      * @param  string  $label
      */
-    public function __construct($province, $city, $district, $label = '')
+    public function __construct(string $province, string $city = "", string $district = "", string $label = '')
     {
-        $this->column = compact('province', 'city', 'district');
-        $this->label = $label;
+        $column = Array_filter(compact('province', 'city', 'district'));
+
+        parent::__construct($column, empty($label) ? '地区选择' : $label);
 
         $this->setPresenter(new FilterPresenter());
     }
 
 
-    public function originalColumn()
-    {
-        return $this->column;
-    }
-
     /**
      * @return string
+     * @author super-eggs
      */
-    public function getElementName()
+    public function getElementName(): string
     {
         return $this->parent->grid()->makeName('district');
     }
 
-    public function setParent(Filter $filter)
-    {
-        $this->parent = $filter;
-
-        $this->id = $this->formatId($this->column);
-    }
-
-
     /**
-     * {@inheritdoc}
+     * @return array
+     * @author super-eggs
      */
-    public function getColumn()
+    public function getColumn(): array
     {
         $columns = [];
 
@@ -85,17 +76,17 @@ class DistpickerFilter extends AbstractFilter
     }
 
     /**
-     * {@inheritdoc}
+     * @param  array  $inputs
+     * @return array|array[]|mixed|void|null
+     * @author super-eggs
      */
     public function condition($inputs)
     {
-
-        //todo 测试
-        $value = array_filter([
-            $this->column['province'] => Arr::get($inputs, $this->column['province']),
-            $this->column['city'] => Arr::get($inputs, $this->column['city']),
-            $this->column['district'] => Arr::get($inputs, $this->column['district']),
-        ]);
+        $value_arr = array();
+        foreach ($this->column as $column) {
+            $value_arr[$column] = Arr::get($inputs, $column);
+        }
+        $value = array_filter($value_arr);
 
         if (empty($value)) {
             return;
@@ -118,20 +109,19 @@ class DistpickerFilter extends AbstractFilter
      * 建立关系查询
      * {@inheritdoc}
      */
-    protected function buildRelationQuery($relColumn, ...$columns)
+    protected function buildRelationQuery($relColumn, ...$params): array
     {
         $data = [];
-
-        foreach ($columns as $column => $value) {
+        foreach ($relColumn as $column => $value) {
             Arr::set($data, $column, $value);
         }
-
         $relation = key($data);
-
         $args = $data[$relation];
+        // 增加对whereHasIn的支持
+        $method = class_exists(WhereHasInServiceProvider::class) ? 'whereHasIn' : 'whereHas';
 
         return [
-            'whereHas' => [
+            $method => [
                 $relation, function ($relation) use ($args) {
                     call_user_func_array([$relation, $this->query], [$args]);
                 },
@@ -140,10 +130,11 @@ class DistpickerFilter extends AbstractFilter
     }
 
     /**
-     * 格式名称
-     * {@inheritdoc}
+     * @param  array  $column
+     * @return array|string
+     * @author super-eggs
      */
-    public function formatName($column)
+    public function formatName($column): array|string
     {
         $columns = [];
 
@@ -157,17 +148,13 @@ class DistpickerFilter extends AbstractFilter
     /**
      * 格式编号
      * @param  array|string  $columns
-     * @return array|string
-     * @author guozhiyuan
+     * @return string
+     * @author super-eggs
      */
-    protected function formatId($columns)
+    protected function formatId($columns): string
     {
         if (is_array($columns)) {
             $columns = 'district';
-//            foreach ($columns as &$column) {
-//                $column = $this->formatId($column);
-//            }
-//            return $columns;
         }
 
         return $this->parent->grid()->makeName('filter-column-'.str_replace('.', '-', $columns));
@@ -177,17 +164,38 @@ class DistpickerFilter extends AbstractFilter
      * 设置js脚本。
      * Setup js scripts.
      */
-    protected function setupScript()
+    protected function setupScript(): void
     {
-        $province = old($this->column['province'], Arr::get($this->value, $this->column['province']));
-        $city = old($this->column['city'], Arr::get($this->value, $this->column['city']));
-        $district = old($this->column['district'], Arr::get($this->value, $this->column['district']));
+        $province = old($this->column['province'], Arr::get($this->value, 'province')) ?: Arr::get($this->placeholder,
+            'province');
+        $city = "";
+        $district = "";
+        if (isset($this->column['city'])) {
+            $city = old($this->column['city'], Arr::get($this->value, 'city')) ?: Arr::get($this->placeholder,
+                'city');
+        }
+        if (isset($this->column['district'])) {
+            $district = old($this->column['district'],
+                Arr::get($this->value, 'district')) ?: Arr::get($this->placeholder, 'district');
+        }
 
+        $color = Admin::color()->primary();
         $script = <<<JS
 $("#{$this->id}").distpicker({
   province: '$province',
   city: '$city',
   district: '$district'
+});
+$('.distpicker_select').on('mouseover', function () {
+    var idx = layer.tips($(this).children('option:selected').text(), this, {
+      tips: ['1', '{$color}'],
+      time: 0,
+      maxWidth: 210
+    });
+    $(this).attr('layer-idx', idx);
+}).on('mouseleave', function () {
+    layer.close($(this).attr('layer-idx'));
+    $(this).attr('layer-idx', '');
 });
 JS;
         Admin::script($script);
@@ -195,11 +203,11 @@ JS;
     }
 
 
-    protected function defaultVariables()
+    protected function defaultVariables(): array
     {
         $this->setupScript();
 
-        $data = array_merge([
+        return array_merge([
             'id' => $this->id,
             'name' => $this->formatName($this->column),
             'label' => $this->label,
@@ -208,12 +216,5 @@ JS;
             'width' => $this->width,
             'style' => $this->style,
         ], $this->presenter()->variables());
-
-        return $data;
-    }
-
-    public function render()
-    {
-        return view('china-distpicker::filter', $this->variables());
     }
 }

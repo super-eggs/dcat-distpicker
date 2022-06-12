@@ -8,6 +8,7 @@ use Illuminate\Contracts\Validation\Factory;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Support\Arr;
 use Illuminate\View\View;
+use SuperEggs\DcatDistpicker\DcatDistpickerHelper;
 
 class Distpicker extends Field
 {
@@ -20,7 +21,7 @@ class Distpicker extends Field
      * @var array
      */
     protected static $js = [
-        '@extension/super-eggs/dcat-distpicker/dist/distpicker.min.js',
+        '@extension/super-eggs/dcat-distpicker/dist/distpicker.js',
     ];
 
     /**
@@ -39,34 +40,17 @@ class Distpicker extends Field
      * @param  array  $column
      * @param  array  $arguments
      */
-    public function __construct($column, $arguments)
+    public function __construct(array $column, $arguments)
     {
         parent::__construct($column, $arguments);
         if (!Arr::isAssoc($column)) {
-            $this->column = $this->myArrayCombine($this->columnKeys, $column);
+            $this->column = DcatDistpickerHelper::arrayCombine($this->columnKeys, $column);
         } else {
-            $this->column = $this->myArrayCombine($this->columnKeys, array_keys($column));
-            $this->placeholder = $this->myArrayCombine($this->columnKeys, $column);
+            $this->column = DcatDistpickerHelper::arrayCombine($this->columnKeys, array_keys($column));
+            $this->placeholder = DcatDistpickerHelper::arrayCombine($this->columnKeys, array_values($column));
         }
 
         $this->label = empty($arguments) ? '地区选择' : current($arguments);
-    }
-
-    /**
-     * 合并两个数组来创建一个新数组
-     * @param  array  $keys
-     * @param  array  $values
-     * @return array
-     * @author guozhiyuan
-     */
-    private function myArrayCombine(array $keys, array $values): array
-    {
-        $arr = array();
-        foreach ($values as $k => $value) {
-            $arr[$keys[$k]] = $value;
-        }
-
-        return $arr;
     }
 
     /**
@@ -102,7 +86,7 @@ class Distpicker extends Field
      * @param  int  $count
      * @return $this
      */
-    public function autoselect($count = 0): self
+    public function autoselect(int $count = 0): self
     {
         return $this->attribute('data-autoselect', $count);
     }
