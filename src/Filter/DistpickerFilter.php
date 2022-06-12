@@ -134,7 +134,7 @@ class DistpickerFilter extends AbstractFilter
      * @return array|string
      * @author super-eggs
      */
-    public function formatName($column): array|string
+    public function formatName($column)
     {
         $columns = [];
 

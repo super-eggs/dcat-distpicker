@@ -3262,7 +3262,7 @@ class DcatDistpickerHelper
      * @return string
      * @author super-eggs
      */
-    public static function getAreaName(int|string $code): string
+    public static function getAreaName($code): string
     {
         return self::$areaObject[$code] ?? "";
     }

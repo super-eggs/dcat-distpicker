@@ -7,7 +7,6 @@ use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\Validation\Factory;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Support\Arr;
-use Illuminate\View\View;
 use SuperEggs\DcatDistpicker\DcatDistpickerHelper;
 
 class Distpicker extends Field
@@ -70,7 +69,7 @@ class Distpicker extends Field
             return false;
         }
 
-        foreach ($this->column as $key => $column) {
+        foreach ($this->column as $column) {
             if (!Arr::has($input, $column)) {
                 continue;
             }
@@ -94,7 +93,7 @@ class Distpicker extends Field
     /**
      * {@inheritdoc}
      */
-    public function render(): \Illuminate\Contracts\View\Factory|string|View
+    public function render()
     {
         $this->attribute('data-value-type', 'code');
 
