@@ -3,6 +3,12 @@
 [Distpicker](https://github.com/fengyuanchen/distpicker) 是一个中国省市区三级联动选择组件，这个包是基于 `Distpicker` 的 `dcat-admin`
 扩展，用来将 `Distpicker` 集成进 `dcat-admin`的表单中。如果此插件给你带来的帮助，麻烦给我一个 `star`。如果在使用过程中发现地区不完整的情况，欢迎随时反馈给我。
 
+## 推荐环境
+
+- php >= 7.4
+- laravel >= v8.0.0
+- dcat-admin >= v2.2.0
+
 ## 截图
 
 ![image-20200628150204971](https://tva1.sinaimg.cn/large/007S8ZIlly1gg80kgiwpcj32000iajt9.jpg)
