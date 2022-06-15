@@ -26,7 +26,7 @@ class Distpicker extends Field
     /**
      * @var array
      */
-    protected array $columnKeys = ['province', 'city', 'district'];
+    protected $columnKeys = ['province', 'city', 'district'];
 
     /**
      * @var array
@@ -112,14 +112,14 @@ class Distpicker extends Field
 
         $id = uniqid('distpicker-', false);
         $this->script = <<<JS
-            Dcat.init('#{$id}', function (self) {
-                self.distpicker({
-                  province: '$province',
-                  city: '$city',
-                  district: '$district'
-                });
-            })
-        JS;
+Dcat.init('#{$id}', function (self) {
+    self.distpicker({
+      province: '$province',
+      city: '$city',
+      district: '$district'
+    });
+})
+JS;
         $this->addVariables(compact('id'));
 
         return parent::render();

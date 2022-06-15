@@ -5,7 +5,7 @@ namespace SuperEggs\DcatDistpicker;
 
 class DcatDistpickerHelper
 {
-    protected static array $areaObject = [
+    protected static $areaObject = [
         110000 => '北京市',
         110100 => '北京城区',
         110101 => '东城区',
