@@ -48,13 +48,9 @@ class DistpickerFilter extends AbstractFilter
     }
 
 
-    /**
-     * @return string
-     * @author super-eggs
-     */
-    public function getElementName(): string
+    public function getElementName()
     {
-        return $this->parent->grid()->makeName('district');
+        return $this->originalColumn();
     }
 
     /**
@@ -94,7 +90,7 @@ class DistpickerFilter extends AbstractFilter
 
         $this->value = $value;
 
-        if (!$this->value) {
+        if (! $this->value) {
             return [];
         }
 
@@ -166,22 +162,25 @@ class DistpickerFilter extends AbstractFilter
      */
     protected function setupScript(): void
     {
-        $province = old($this->column['province'], Arr::get($this->value, 'province')) ?: Arr::get($this->placeholder,
-            'province');
+        $province = old($this->column['province'],
+            Arr::get($this->value, $this->column['province'])) ?: Arr::get($this->placeholder,
+            $this->column['province']);
         $city = "";
         $district = "";
         if (isset($this->column['city'])) {
-            $city = old($this->column['city'], Arr::get($this->value, 'city')) ?: Arr::get($this->placeholder,
-                'city');
+            $city = old($this->column['city'],
+                Arr::get($this->value, $this->column['city'])) ?: Arr::get($this->placeholder,
+                $this->column['city']);
         }
         if (isset($this->column['district'])) {
             $district = old($this->column['district'],
-                Arr::get($this->value, 'district')) ?: Arr::get($this->placeholder, 'district');
+                Arr::get($this->value, $this->column['district'])) ?: Arr::get($this->placeholder,
+                $this->column['district']);
         }
-
+        $id = uniqid('distpicker-filter-', false);
         $color = Admin::color()->primary();
         $script = <<<JS
-$("#{$this->id}").distpicker({
+$("#{$id}").distpicker({
   province: '$province',
   city: '$city',
   district: '$district'
@@ -200,6 +199,8 @@ $('.distpicker_select').on('mouseover', function () {
 JS;
         Admin::script($script);
         Admin::js(static::$js);
+
+        $this->addVariables(compact('id'));
     }
 
 
@@ -207,14 +208,8 @@ JS;
     {
         $this->setupScript();
 
-        return array_merge([
-            'id' => $this->id,
-            'name' => $this->formatName($this->column),
-            'label' => $this->label,
-            'value' => $this->normalizeValue(),
-            'presenter' => $this->presenter(),
-            'width' => $this->width,
-            'style' => $this->style,
-        ], $this->presenter()->variables());
+        return parent::defaultVariables();
     }
+
+
 }
